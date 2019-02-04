@@ -1,7 +1,18 @@
 require "rails_helper"
-
+if RUBY_VERSION>='2.6.0'
+ if Rails.version < '5'
+   class ActionController::TestResponse < ActionDispatch::TestResponse
+     def recycle!
+       # hack to avoid MonitorMixin double-initialize error:
+       @mon_mutex_owner_object_id = nil
+       @mon_mutex = nil
+       initialize
+     end
+   end
+ end
+end
 RSpec.describe AuthorsController do
-  let(:jeff) { Author.create!(name: "H. Jeff", email: "jeff@sbahj.info") }
+  let(:jeff) { Author.create(name: "H.Jeff", email: "jeff@sbahj.info") }
   let(:jeff_found) { Author.find_by(email: jeff.email) }
 
   describe "showing an author" do
